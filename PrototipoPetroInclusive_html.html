@@ -1,0 +1,1235 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Petro Inclusive — Sistema de Gestao de Inclusao | Petrobras</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  * { font-family: 'Inter', sans-serif; }
+  .gradient-bg { background: linear-gradient(135deg, #1a2332 0%, #007A2F 60%, #009B3A 100%); }
+  .card-hover { transition: all 0.3s ease; }
+  .card-hover:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .sidebar-item { transition: all 0.2s ease; }
+  .sidebar-item:hover { background: rgba(255,255,255,0.15); }
+  .sidebar-item.active { background: rgba(255,255,255,0.2); border-left: 3px solid #009B3A; }
+  .input-field { transition: all 0.2s ease; }
+  
+  .badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600; }
+  .shimmer { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  .typing-dots span { display:inline-block; animation: bounce 1.2s infinite; }
+  .typing-dots span:nth-child(2){animation-delay:.2s}
+  .typing-dots span:nth-child(3){animation-delay:.4s}
+  @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+  .fade-in { animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .progress-bar { transition: width 1s ease; }
+  ::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:#f1f5f9} ::-webkit-scrollbar-thumb{background:#94a3b8;border-radius:3px}
+  .tag { display:inline-block; padding:3px 10px; border-radius:4px; font-size:11px; font-weight:600; margin:2px; }
+  .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;display:flex;align-items:center;justify-content:center; }
+  .modal-box { background:#fff;border-radius:16px;max-width:680px;width:95%;max-height:90vh;overflow-y:auto;padding:32px; }
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- ============ LOGIN PAGE ============ -->
+<div id="page-login" class="min-h-screen flex">
+  <!-- Left panel -->
+  <div class="hidden lg:flex w-5/12 gradient-bg flex-col justify-between p-12 text-white relative overflow-hidden">
+    <div>
+      <div class="flex items-center gap-3 mb-12">
+        <div class="w-10 h-10 bg-white/20 rounded flex items-center justify-center text-xl">Br</div>
+        <span class="text-2xl font-bold">Petro Inclusive</span>
+      </div>
+      <h1 class="text-4xl font-bold leading-tight mb-6">Gestão inteligente<br/>de inclusão nas<br/>empresas</h1>
+      <p class="text-green-300 text-lg">Coleta, análise e relatórios de acessibilidade para times de RH com suporte de Inteligência Artificial.</p>
+    </div>
+    <div class="grid grid-cols-3 gap-4">
+      <div class="bg-white/10 rounded-md p-4 text-center">
+        <div class="text-3xl font-bold">98%</div>
+        <div class="text-green-300 text-sm">Precisão da IA</div>
+      </div>
+      <div class="bg-white/10 rounded-md p-4 text-center">
+        <div class="text-3xl font-bold">5x</div>
+        <div class="text-green-300 text-sm">Mais rápido</div>
+      </div>
+      <div class="bg-white/10 rounded-md p-4 text-center">
+        <div class="text-3xl font-bold">ISO</div>
+        <div class="text-green-300 text-sm">30.060 alinhado</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right panel -->
+  <div class="flex-1 flex items-center justify-center p-8">
+    <div class="w-full max-w-md fade-in">
+      <div class="lg:hidden flex items-center gap-2 mb-8 justify-center">
+        <div class="w-8 h-8 bg-green-700 rounded-lg flex items-center justify-center text-white">Br</div>
+        <span class="text-xl font-bold text-gray-800">Petro Inclusive</span>
+      </div>
+      <div style="height:3px;background:linear-gradient(90deg,#009B3A,#FEDF00);border-radius:2px;" class="mb-6"></div>
+      <h2 class="text-2xl font-bold text-gray-800 mb-2">Acesso ao Sistema</h2>
+      <p class="text-gray-500 mb-8">Escolha seu perfil de acesso</p>
+
+      <div class="grid grid-cols-2 gap-4 mb-8">
+        <button onclick="setLoginRole('employer')" id="btn-employer"
+          class="p-5 rounded-md border-2 border-green-600 bg-green-50 text-center cursor-pointer transition hover:bg-green-100">
+          <div class="text-3xl mb-2"></div>
+          <div class="font-semibold text-green-800">Empregador / RH</div>
+          <div class="text-xs text-gray-500 mt-1">Dashboard e relatórios</div>
+        </button>
+        <button onclick="setLoginRole('employee')" id="btn-employee"
+          class="p-5 rounded-md border-2 border-gray-200 text-center cursor-pointer transition hover:border-green-400 hover:bg-green-50">
+          <div class="text-3xl mb-2"></div>
+          <div class="font-semibold text-gray-700">Funcionário</div>
+          <div class="text-xs text-gray-500 mt-1">Preencher formulário</div>
+        </button>
+      </div>
+
+      <div id="employer-fields">
+        <div class="mb-4">
+          <label class="text-sm font-medium text-gray-700 block mb-1">E-mail corporativo</label>
+          <input type="email" id="login-email" value="rh@petrobras.com.br" class="input-field w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-green-600"/>
+        </div>
+        <div class="mb-4">
+          <label class="text-sm font-medium text-gray-700 block mb-1">Senha</label>
+          <input type="password" id="login-pass" value="••••••••" class="input-field w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-green-600"/>
+        </div>
+        <div class="mb-4">
+          <label class="text-sm font-medium text-gray-700 block mb-1">Chave de API Gemini (para análises de IA)</label>
+          <input type="password" id="api-key-input" placeholder="AIza..." class="input-field w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-green-600"/>
+          <p class="text-xs text-gray-400 mt-1">Obtenha em <a href="https://aistudio.google.com" target="_blank" class="text-green-600">aistudio.google.com</a> (gratuito)</p>
+        </div>
+      </div>
+
+      <div id="employee-fields" class="hidden">
+        <div class="mb-4">
+          <label class="text-sm font-medium text-gray-700 block mb-1">Nome completo</label>
+          <input type="text" id="emp-name-login" placeholder="Seu nome" class="input-field w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-green-600"/>
+        </div>
+        <div class="mb-4">
+          <label class="text-sm font-medium text-gray-700 block mb-1">Matrícula / CPF</label>
+          <input type="text" id="emp-id-login" placeholder="000.000.000-00" class="input-field w-full border border-gray-300 rounded px-4 py-3 focus:outline-none focus:border-green-600"/>
+        </div>
+      </div>
+
+      <button onclick="doLogin()" class="w-full gradient-bg text-white py-3.5 rounded font-semibold text-lg hover:opacity-90 transition">
+        Acessar sistema →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ EMPLOYEE FORM ============ -->
+<div id="page-form" class="hidden min-h-screen" style="background:#f4f6f8;">
+  <div style="height:3px;background:linear-gradient(90deg,#009B3A,#FEDF00)"></div>
+  <nav class="bg-white shadow-sm px-6 py-3.5 flex items-center justify-between border-b border-gray-200">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-green-700 rounded-lg flex items-center justify-center text-white text-sm">Br</div>
+      <span class="font-bold text-gray-800">Petro Inclusive</span>
+    </div>
+    <span class="text-sm text-gray-500">Formulário confidencial • Seus dados são protegidos</span>
+    <button onclick="showPage('page-login')" class="text-sm text-green-700 hover:underline">Sair</button>
+  </nav>
+
+  <div class="max-w-3xl mx-auto px-4 py-10">
+    <!-- Progress -->
+    <div class="mb-8">
+      <div class="flex justify-between text-sm text-gray-500 mb-2">
+        <span>Progresso do formulário</span>
+        <span id="form-progress-text">0%</span>
+      </div>
+      <div class="h-2 bg-gray-200 rounded-full">
+        <div id="form-progress-bar" class="progress-bar h-2 bg-green-600 rounded-full" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-xl p-8 fade-in">
+      <div class="flex items-center gap-3 mb-8 pb-6 border-b border-gray-100">
+        <div class="w-12 h-12 bg-green-100 rounded-md flex items-center justify-center text-2xl"></div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">Formulário de Inclusão e Acessibilidade</h2>
+          <p class="text-gray-500 text-sm">Todas as informações são confidenciais e usadas apenas para melhorar seu ambiente de trabalho</p>
+        </div>
+      </div>
+
+      <!-- Section 1 — Dados pessoais -->
+      <div class="mb-8">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+          <span class="w-7 h-7 bg-green-700 text-white rounded-full text-sm flex items-center justify-center">1</span>
+          Dados Pessoais
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm font-medium text-gray-600 block mb-1">Nome completo *</label>
+            <input id="f-nome" type="text" class="input-field w-full border border-gray-200 rounded px-4 py-3 focus:outline-none focus:border-green-600" onchange="updateProgress()"/>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-600 block mb-1">Matrícula *</label>
+            <input id="f-matricula" type="text" class="input-field w-full border border-gray-200 rounded px-4 py-3 focus:outline-none focus:border-green-600" onchange="updateProgress()"/>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-600 block mb-1">Data de nascimento</label>
+            <input id="f-nascimento" type="date" class="input-field w-full border border-gray-200 rounded px-4 py-3 focus:outline-none focus:border-green-600" onchange="updateProgress()"/>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-600 block mb-1">Cargo / Departamento</label>
+            <input id="f-cargo" type="text" class="input-field w-full border border-gray-200 rounded px-4 py-3 focus:outline-none focus:border-green-600" onchange="updateProgress()"/>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-600 block mb-1">Tempo de empresa</label>
+            <select id="f-tempo" class="input-field w-full border border-gray-200 rounded px-4 py-3 focus:outline-none focus:border-green-600 bg-white" onchange="updateProgress()">
+              <option value="">Selecione...</option>
+              <option>Menos de 1 ano</option>
+              <option>1 a 3 anos</option>
+              <option>3 a 5 anos</option>
+              <option>5 a 10 anos</option>
+              <option>Mais de 10 anos</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-600 block mb-1">Modalidade de trabalho</label>
+            <select id="f-modalidade" class="input-field w-full border border-gray-200 rounded px-4 py-3 focus:outline-none focus:border-green-600 bg-white" onchange="updateProgress()">
+              <option value="">Selecione...</option>
+              <option>Presencial</option>
+              <option>Híbrido</option>
+              <option>Remoto</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2 — Deficiências -->
+      <div class="mb-8">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+          <span class="w-7 h-7 bg-green-700 text-white rounded-full text-sm flex items-center justify-center">2</span>
+          Tipo(s) de Deficiência
+        </h3>
+        <p class="text-sm text-gray-500 mb-4">Selecione todos os que se aplicam. Se não possuir nenhuma, pode deixar em branco.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="def-options">
+          <!-- Physical -->
+          <label class="flex items-start gap-3 p-4 rounded-md border-2 border-gray-200 cursor-pointer hover:border-green-400 transition has-[:checked]:border-green-600 has-[:checked]:bg-green-50">
+            <input type="checkbox" name="deficiencia" value="fisica" class="mt-1 w-4 h-4 text-green-700" onchange="updateProgress()"/>
+            <div>
+              <div class="font-semibold text-gray-700">Fisica / Motora</div>
+              <div class="text-xs text-gray-500">Limitações de mobilidade, uso de cadeira de rodas, muletas, próteses</div>
+            </div>
+          </label>
+          <label class="flex items-start gap-3 p-4 rounded-md border-2 border-gray-200 cursor-pointer hover:border-green-400 transition has-[:checked]:border-green-600 has-[:checked]:bg-green-50">
+            <input type="checkbox" name="deficiencia" value="visual" class="mt-1 w-4 h-4 text-green-700" onchange="updateProgress()"/>
+            <div>
+              <div class="font-semibold text-gray-700">Visual</div>
+              <div class="text-xs text-gray-500">Baixa visão, cegueira parcial ou total, daltonismo</div>
+            </div>
+          </label>
+          <label class="flex items-start gap-3 p-4 rounded-md border-2 border-gray-200 cursor-pointer hover:border-green-400 transition has-[:checked]:border-green-600 has-[:checked]:bg-green-50">
+            <input type="checkbox" name="deficiencia" value="auditiva" class="mt-1 w-4 h-4 text-green-700" onchange="updateProgress()"/>
+            <div>
+              <div class="font-semibold text-gray-700">Auditiva</div>
+              <div class="text-xs text-gray-500">Surdez parcial ou total, uso de aparelho auditivo</div>
+            </div>
+          </label>
+          <label class="flex items-start gap-3 p-4 rounded-md border-2 border-gray-200 cursor-pointer hover:border-green-400 transition has-[:checked]:border-green-600 has-[:checked]:bg-green-50">
+            <input type="checkbox" name="deficiencia" value="intelectual" class="mt-1 w-4 h-4 text-green-700" onchange="updateProgress()"/>
+            <div>
+              <div class="font-semibold text-gray-700">Intelectual / Mental</div>
+              <div class="text-xs text-gray-500">Dificuldade cognitiva, transtornos de aprendizagem, saúde mental</div>
+            </div>
+          </label>
+          <label class="flex items-start gap-3 p-4 rounded-md border-2 border-gray-200 cursor-pointer hover:border-green-400 transition has-[:checked]:border-green-600 has-[:checked]:bg-green-50">
+            <input type="checkbox" name="deficiencia" value="multipla" class="mt-1 w-4 h-4 text-green-700" onchange="updateProgress()"/>
+            <div>
+              <div class="font-semibold text-gray-700">Multipla</div>
+              <div class="text-xs text-gray-500">Combinação de dois ou mais tipos de deficiência</div>
+            </div>
+          </label>
+          <label class="flex items-start gap-3 p-4 rounded-md border-2 border-gray-200 cursor-pointer hover:border-green-400 transition has-[:checked]:border-green-600 has-[:checked]:bg-green-50">
+            <input type="checkbox" name="deficiencia" value="nenhuma" class="mt-1 w-4 h-4 text-green-700" onchange="updateProgress()"/>
+            <div>
+              <div class="font-semibold text-gray-700">Nenhuma declarada</div>
+              <div class="text-xs text-gray-500">Não possuo deficiência a declarar no momento</div>
+            </div>
+          </label>
+        </div>
+        <div class="mt-4">
+          <label class="text-sm font-medium text-gray-600 block mb-1">Outras condições ou observações (campo livre)</label>
+          <textarea id="f-outros" rows="3" placeholder="Ex: Tenho artrite, daltonismo leve, uso de óculos..." class="input-field w-full border border-gray-200 rounded px-4 py-3 focus:outline-none focus:border-green-600 resize-none" onchange="updateProgress()"></textarea>
+        </div>
+      </div>
+
+      <!-- Section 3 — Impacto no trabalho -->
+      <div class="mb-8">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+          <span class="w-7 h-7 bg-green-700 text-white rounded-full text-sm flex items-center justify-center">3</span>
+          Impacto no Trabalho
+        </h3>
+        <div class="space-y-4">
+          <div>
+            <label class="text-sm font-medium text-gray-600 block mb-1">Grau de dificuldade no exercício das funções *</label>
+            <select id="f-grau" class="input-field w-full border border-gray-200 rounded px-4 py-3 focus:outline-none focus:border-green-600 bg-white" onchange="updateProgress()">
+              <option value="">Selecione...</option>
+              <option value="0">Nenhum — executo tudo normalmente</option>
+              <option value="1">Leve — pequenas adaptações seriam úteis</option>
+              <option value="2">Moderado — preciso de suporte em algumas tarefas</option>
+              <option value="3">Significativo — preciso de adaptações importantes</option>
+              <option value="4">Severo — não consigo executar parte das funções sem auxílio</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-600 block mb-2">Quais áreas do trabalho são mais afetadas? (selecione todos)</label>
+            <div class="flex flex-wrap gap-2" id="areas-trabalho">
+              <label class="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2 cursor-pointer hover:bg-green-100 transition has-[:checked]:bg-green-100 has-[:checked]:text-green-800">
+                <input type="checkbox" name="area" value="deslocamento" class="w-3 h-3"/> Deslocamento no espaço
+              </label>
+              <label class="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2 cursor-pointer hover:bg-green-100 transition has-[:checked]:bg-green-100 has-[:checked]:text-green-800">
+                <input type="checkbox" name="area" value="comunicacao" class="w-3 h-3"/> Comunicação
+              </label>
+              <label class="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2 cursor-pointer hover:bg-green-100 transition has-[:checked]:bg-green-100 has-[:checked]:text-green-800">
+                <input type="checkbox" name="area" value="tecnologia" class="w-3 h-3"/> Uso de tecnologia
+              </label>
+              <label class="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2 cursor-pointer hover:bg-green-100 transition has-[:checked]:bg-green-100 has-[:checked]:text-green-800">
+                <input type="checkbox" name="area" value="reunioes" class="w-3 h-3"/> Reuniões e apresentações
+              </label>
+              <label class="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2 cursor-pointer hover:bg-green-100 transition has-[:checked]:bg-green-100 has-[:checked]:text-green-800">
+                <input type="checkbox" name="area" value="ergonomia" class="w-3 h-3"/> Ergonomia / Postura
+              </label>
+              <label class="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2 cursor-pointer hover:bg-green-100 transition has-[:checked]:bg-green-100 has-[:checked]:text-green-800">
+                <input type="checkbox" name="area" value="documentos" class="w-3 h-3"/> Leitura de documentos
+              </label>
+              <label class="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2 cursor-pointer hover:bg-green-100 transition has-[:checked]:bg-green-100 has-[:checked]:text-green-800">
+                <input type="checkbox" name="area" value="concentracao" class="w-3 h-3"/> Concentração / Foco
+              </label>
+            </div>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-600 block mb-1">Descreva brevemente os principais desafios</label>
+            <textarea id="f-desafios" rows="4" placeholder="Ex: Tenho dificuldade de acessar o 2º andar pois não há elevador, e as telas do sistema são muito pequenas para leitura..." class="input-field w-full border border-gray-200 rounded px-4 py-3 focus:outline-none focus:border-green-600 resize-none" onchange="updateProgress()"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4 — Recursos e Sugestões -->
+      <div class="mb-8">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+          <span class="w-7 h-7 bg-green-700 text-white rounded-full text-sm flex items-center justify-center">4</span>
+          Recursos e Sugestões
+        </h3>
+        <div class="space-y-4">
+          <div>
+            <label class="text-sm font-medium text-gray-600 block mb-1">Já possui algum recurso/adaptação no trabalho?</label>
+            <select id="f-recursos" class="input-field w-full border border-gray-200 rounded px-4 py-3 focus:outline-none focus:border-green-600 bg-white" onchange="updateProgress()">
+              <option value="">Selecione...</option>
+              <option>Sim, tenho todas as adaptações necessárias</option>
+              <option>Sim, mas precisaria de mais</option>
+              <option>Não, mas não preciso</option>
+              <option>Não, e precisaria</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-600 block mb-1">O que sugere para melhorar sua experiência?</label>
+            <textarea id="f-sugestoes" rows="4" placeholder="Ex: Gostaria de ter um software de leitura de tela, cadeira ergonômica, intérprete de LIBRAS nas reuniões..." class="input-field w-full border border-gray-200 rounded px-4 py-3 focus:outline-none focus:border-green-600 resize-none" onchange="updateProgress()"></textarea>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-600 block mb-2">Nível de satisfação com o suporte atual</label>
+            <div class="flex gap-2">
+              <button onclick="setSatisfacao(1)" id="sat-1" class="sat-btn flex-1 py-3 rounded border-2 border-gray-200 text-sm font-medium hover:border-red-400 transition">Muito Ruim</button>
+              <button onclick="setSatisfacao(2)" id="sat-2" class="sat-btn flex-1 py-3 rounded border-2 border-gray-200 text-sm font-medium hover:border-orange-400 transition">Ruim</button>
+              <button onclick="setSatisfacao(3)" id="sat-3" class="sat-btn flex-1 py-3 rounded border-2 border-gray-200 text-sm font-medium hover:border-yellow-400 transition">Regular</button>
+              <button onclick="setSatisfacao(4)" id="sat-4" class="sat-btn flex-1 py-3 rounded border-2 border-gray-200 text-sm font-medium hover:border-green-400 transition">Bom</button>
+              <button onclick="setSatisfacao(5)" id="sat-5" class="sat-btn flex-1 py-3 rounded border-2 border-gray-200 text-sm font-medium hover:border-green-400 transition">Excelente</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5 — LGPD -->
+      <div class="mb-8 bg-amber-50 rounded-md p-5 border border-amber-200">
+        <h4 class="font-semibold text-amber-800 mb-2 flex items-center gap-2">Consentimento LGPD</h4>
+        <p class="text-sm text-amber-700 mb-3">Seus dados sensíveis (deficiências) são tratados conforme a Lei Geral de Proteção de Dados (LGPD), Art. 11, II, alínea f. São usados exclusivamente para adequação das condições de trabalho e não serão compartilhados com terceiros.</p>
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" id="f-lgpd" class="mt-1 w-4 h-4 text-green-700" onchange="updateProgress()"/>
+          <span class="text-sm text-amber-800 font-medium">Li e concordo com o tratamento dos meus dados pessoais sensíveis conforme descrito acima *</span>
+        </label>
+      </div>
+
+      <button onclick="submitForm()" class="w-full text-white py-4 rounded font-bold text-sm hover:opacity-90 transition flex items-center justify-center gap-2" style="background:#009B3A;">
+        Enviar Formulario com Seguranca
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ EMPLOYER DASHBOARD ============ -->
+<div id="page-dashboard" class="hidden min-h-screen flex">
+  <!-- Sidebar -->
+  <div class="w-64 text-white flex flex-col fixed h-full z-10" style="background:linear-gradient(180deg,#1a2332,#0d1b2a);">
+    <div class="p-6 border-b border-white/20">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-white/20 rounded flex items-center justify-center text-lg">Br</div>
+        <div>
+          <div class="font-bold text-white">Petro Inclusive</div>
+          <div class="text-xs text-green-300">Painel do RH</div>
+        </div>
+      </div>
+    </div>
+    <nav class="flex-1 p-4 space-y-1">
+      <button onclick="showDashTab('overview')" class="sidebar-item active w-full text-left px-4 py-3 rounded text-sm font-medium flex items-center gap-3" id="tab-overview">
+        Visao Geral
+      </button>
+      <button onclick="showDashTab('responses')" class="sidebar-item w-full text-left px-4 py-3 rounded text-sm font-medium flex items-center gap-3" id="tab-responses">
+         Respostas
+      </button>
+      <button onclick="showDashTab('analytics')" class="sidebar-item w-full text-left px-4 py-3 rounded text-sm font-medium flex items-center gap-3" id="tab-analytics">
+        Analises
+      </button>
+      <button onclick="showDashTab('actions')" class="sidebar-item w-full text-left px-4 py-3 rounded text-sm font-medium flex items-center gap-3" id="tab-actions">
+        Plano de Ação
+      </button>
+    </nav>
+    <div class="p-4 border-t border-white/20">
+      <div class="text-xs text-green-300 mb-2">Empresa ativa</div>
+      <div class="font-semibold text-sm">Petrobras S.A.</div>
+      <button onclick="showPage('page-login')" class="mt-3 text-xs text-green-400 hover:text-white">← Sair</button>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="ml-64 flex-1 overflow-auto">
+    <div style="height:3px;background:linear-gradient(90deg,#009B3A,#FEDF00)"></div>
+    <!-- Top bar -->
+    <div class="bg-white shadow-sm px-8 py-4 flex items-center justify-between sticky top-0 z-10">
+      <div>
+        <div class="text-xs text-gray-400 mb-0.5">Petrobras <span class="mx-1">/</span> RH <span class="mx-1">/</span> <span id="dash-breadcrumb" class="font-medium" style="color:#009B3A">Visao Geral</span></div>
+        <h1 class="font-bold text-gray-800 text-lg" id="dash-title">Visao Geral</h1>
+        <p class="text-gray-400 text-sm" id="dash-subtitle">Resumo dos formularios recebidos</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="response-count" class="badge bg-green-100 text-green-800">0 respostas</span>
+        <button onclick="addMockData()" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded border border-gray-200 transition font-medium">+ Dados de teste</button>
+      </div>
+    </div>
+
+    <!-- TAB: Overview -->
+    <div id="tab-content-overview" class="p-8 fade-in">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-md p-6 shadow-sm card-hover">
+          <div class="flex items-center justify-between mb-4">
+            <span class="badge bg-green-100 text-green-700">↑ 12%</span>
+          </div>
+          <div class="text-3xl font-bold text-gray-800" id="stat-total">0</div>
+          <div class="text-gray-500 text-sm">Total de respostas</div>
+        </div>
+        <div class="bg-white rounded-md p-6 shadow-sm card-hover">
+          <div class="flex items-center justify-between mb-4">
+            <span class="badge bg-purple-100 text-purple-700">Pcd</span>
+          </div>
+          <div class="text-3xl font-bold text-gray-800" id="stat-pcd">0</div>
+          <div class="text-gray-500 text-sm">Pessoas com deficiência</div>
+        </div>
+        <div class="bg-white rounded-md p-6 shadow-sm card-hover">
+          <div class="flex items-center justify-between mb-4">
+            <span class="badge bg-amber-100 text-amber-700">Atenção</span>
+          </div>
+          <div class="text-3xl font-bold text-gray-800" id="stat-critical">0</div>
+          <div class="text-gray-500 text-sm">Casos prioritários</div>
+        </div>
+        <div class="bg-white rounded-md p-6 shadow-sm card-hover">
+          <div class="flex items-center justify-between mb-4">
+            <span class="badge bg-green-100 text-green-700">IA</span>
+          </div>
+          <div class="text-3xl font-bold text-gray-800" id="stat-analyzed">0</div>
+          <div class="text-gray-500 text-sm">Analisados pela IA</div>
+        </div>
+      </div>
+
+      <!-- Charts row -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white rounded-md p-6 shadow-sm">
+          <h3 class="font-semibold text-gray-700 mb-4">Distribuição por tipo de deficiência</h3>
+          <canvas id="chart-types" height="200"></canvas>
+        </div>
+        <div class="bg-white rounded-md p-6 shadow-sm">
+          <h3 class="font-semibold text-gray-700 mb-4">Nível de dificuldade reportado</h3>
+          <canvas id="chart-difficulty" height="200"></canvas>
+        </div>
+      </div>
+
+      <!-- Alert cards -->
+      <div class="bg-white rounded-md p-6 shadow-sm">
+        <h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2">Ultimas respostas recebidas</h3>
+        <div id="recent-list" class="space-y-3">
+          <p class="text-gray-400 text-sm text-center py-6">Nenhuma resposta ainda. Clique em "Dados de teste" para simular.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Responses -->
+    <div id="tab-content-responses" class="p-8 fade-in hidden">
+      <div class="bg-white rounded-md shadow-sm">
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+          <h3 class="font-semibold text-gray-700">Todos os formulários recebidos</h3>
+          <input type="text" id="search-input" placeholder="Buscar por nome ou matricula..." onkeyup="filterResponses()" class="border border-gray-200 rounded px-4 py-2 text-sm w-64 focus:outline-none focus:border-green-600"/>
+        </div>
+        <div id="responses-table" class="divide-y divide-gray-50">
+          <p class="text-gray-400 text-sm text-center py-10">Nenhuma resposta ainda.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Analytics -->
+    <div id="tab-content-analytics" class="p-8 fade-in hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-md p-6 shadow-sm">
+          <h3 class="font-semibold text-gray-700 mb-4">Áreas mais afetadas</h3>
+          <canvas id="chart-areas" height="250"></canvas>
+        </div>
+        <div class="bg-white rounded-md p-6 shadow-sm">
+          <h3 class="font-semibold text-gray-700 mb-4">Satisfação com suporte atual</h3>
+          <canvas id="chart-satisfaction" height="250"></canvas>
+        </div>
+      </div>
+      <div class="bg-white rounded-md p-6 shadow-sm">
+        <h3 class="font-semibold text-gray-700 mb-6">Top sugestoes dos funcionarios</h3>
+        <div id="top-suggestions" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <p class="text-gray-400 text-sm col-span-3 text-center py-4">Adicione dados de teste para ver sugestões</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Action Plan -->
+    <div id="tab-content-actions" class="p-8 fade-in hidden">
+      <div class="bg-white rounded-md p-6 shadow-sm mb-6">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="font-semibold text-gray-700 text-lg">Gerar Plano de Ação com IA</h3>
+          <button onclick="generateActionPlan()" class="text-white px-6 py-2.5 rounded font-medium hover:opacity-90 transition text-sm" style="background:#009B3A;">
+            Gerar com IA
+          </button>
+        </div>
+        <p class="text-gray-500 text-sm">A IA analisa todos os formulários e gera um plano de ação priorizado com problemas identificados e soluções recomendadas para sua empresa.</p>
+      </div>
+      <div id="action-plan-content">
+        <p class="text-gray-400 text-sm text-center py-16 bg-white rounded-md shadow-sm">Clique em "Gerar com IA" para criar o plano de ação baseado nas respostas coletadas.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: INDIVIDUAL ANALYSIS ============ -->
+<div id="modal-analysis" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold text-gray-800">Analise Individual — IA</h2>
+      <button onclick="closeModal()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200">X</button>
+    </div>
+    <div id="modal-content">
+      <div class="text-center py-8">
+        <div class="typing-dots text-green-600 text-2xl mb-3"><span>.</span><span>.</span><span>.</span></div>
+        <p class="text-gray-500">Consultando IA...</p>
+      </div>
+    </div>
+    <div class="flex gap-3 mt-6 pt-6 border-t border-gray-100">
+      <button onclick="generatePDF()" class="flex-1 gradient-bg text-white py-3 rounded font-semibold hover:opacity-90 transition">
+        Exportar PDF
+      </button>
+      <button onclick="closeModal()" class="px-6 py-3 border border-gray-200 rounded text-gray-600 hover:bg-gray-50 transition">
+        Fechar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SUCCESS PAGE ============ -->
+<div id="page-success" class="hidden min-h-screen flex items-center justify-center" style="background:#f4f6f8;">
+  <div class="bg-white rounded-lg shadow-xl p-12 max-w-md w-full text-center fade-in">
+    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center text-4xl mx-auto mb-6"></div>
+    <h2 class="text-2xl font-bold text-gray-800 mb-3">Formulário enviado!</h2>
+    <p class="text-gray-500 mb-8">Suas informações foram recebidas com segurança. O time de RH irá analisar e, se necessário, entrará em contato para implementar melhorias.</p>
+    <div class="bg-green-50 rounded-md p-4 mb-8 text-left">
+      <div class="text-sm font-semibold text-green-800 mb-2"> Seus direitos garantidos:</div>
+      <ul class="text-sm text-green-700 space-y-1">
+        <li>• Dados protegidos pela LGPD</li>
+        <li>• Acesso restrito ao RH</li>
+        <li>• Você pode solicitar exclusão a qualquer momento</li>
+      </ul>
+    </div>
+    <button onclick="showPage('page-login')" class="w-full gradient-bg text-white py-3 rounded font-semibold hover:opacity-90 transition">
+      Voltar ao início
+    </button>
+  </div>
+</div>
+
+<script>
+// ============ STATE ============
+let currentRole = 'employer';
+let satisfacaoValue = 0;
+let allResponses = JSON.parse(localStorage.getItem('incluirh_responses') || '[]');
+let currentAnalysis = null;
+let chartTypes, chartDifficulty, chartAreas, chartSatisfaction;
+let apiKey = '';
+
+// ============ LOGIN ============
+function setLoginRole(role) {
+  currentRole = role;
+  document.getElementById('btn-employer').className = 'p-5 rounded-md border-2 text-center cursor-pointer transition ' + (role === 'employer' ? 'border-green-600 bg-green-50' : 'border-gray-200 hover:border-green-400 hover:bg-green-50');
+  document.getElementById('btn-employee').className = 'p-5 rounded-md border-2 text-center cursor-pointer transition ' + (role === 'employee' ? 'border-green-600 bg-green-50' : 'border-gray-200 hover:border-green-400 hover:bg-green-50');
+  document.getElementById('employer-fields').classList.toggle('hidden', role !== 'employer');
+  document.getElementById('employee-fields').classList.toggle('hidden', role !== 'employee');
+}
+
+function doLogin() {
+  if (currentRole === 'employer') {
+    apiKey = document.getElementById('api-key-input').value.trim();
+    showPage('page-dashboard');
+    refreshDashboard();
+  } else {
+    const name = document.getElementById('emp-name-login').value.trim();
+    const id = document.getElementById('emp-id-login').value.trim();
+    if (!name || !id) { alert('Por favor, informe nome e matrícula.'); return; }
+    document.getElementById('f-nome').value = name;
+    document.getElementById('f-matricula').value = id;
+    showPage('page-form');
+    updateProgress();
+  }
+}
+
+function showPage(id) {
+  ['page-login','page-form','page-dashboard','page-success'].forEach(p => {
+    document.getElementById(p).classList.add('hidden');
+  });
+  document.getElementById(id).classList.remove('hidden');
+}
+
+// ============ FORM ============
+function updateProgress() {
+  const fields = ['f-nome','f-matricula','f-grau'];
+  const lgpd = document.getElementById('f-lgpd').checked;
+  let filled = fields.filter(f => document.getElementById(f).value.trim()).length;
+  if (lgpd) filled++;
+  const defs = document.querySelectorAll('input[name="deficiencia"]:checked').length;
+  if (defs > 0) filled++;
+  const pct = Math.round((filled / 5) * 100);
+  document.getElementById('form-progress-bar').style.width = pct + '%';
+  document.getElementById('form-progress-text').textContent = pct + '%';
+}
+
+function setSatisfacao(val) {
+  satisfacaoValue = val;
+  [1,2,3,4,5].forEach(i => {
+    const btn = document.getElementById('sat-' + i);
+    const colors = ['red','orange','yellow','blue','green'];
+    btn.className = 'sat-btn flex-1 py-3 rounded border-2 text-sm font-medium transition ' +
+      (i === val ? `border-${colors[i-1]}-500 bg-${colors[i-1]}-50 text-${colors[i-1]}-700` : 'border-gray-200 hover:border-gray-300');
+  });
+}
+
+function submitForm() {
+  if (!document.getElementById('f-nome').value.trim()) { alert('Informe seu nome.'); return; }
+  if (!document.getElementById('f-matricula').value.trim()) { alert('Informe sua matrícula.'); return; }
+  if (!document.getElementById('f-lgpd').checked) { alert('Você precisa aceitar os termos LGPD.'); return; }
+
+  const deficiencias = [...document.querySelectorAll('input[name="deficiencia"]:checked')].map(e => e.value);
+  const areas = [...document.querySelectorAll('input[name="area"]:checked')].map(e => e.value);
+
+  const response = {
+    id: Date.now().toString(),
+    timestamp: new Date().toISOString(),
+    nome: document.getElementById('f-nome').value,
+    matricula: document.getElementById('f-matricula').value,
+    nascimento: document.getElementById('f-nascimento').value,
+    cargo: document.getElementById('f-cargo').value,
+    tempo: document.getElementById('f-tempo').value,
+    modalidade: document.getElementById('f-modalidade').value,
+    deficiencias,
+    outros: document.getElementById('f-outros').value,
+    grau: document.getElementById('f-grau').value,
+    areas,
+    desafios: document.getElementById('f-desafios').value,
+    recursos: document.getElementById('f-recursos').value,
+    sugestoes: document.getElementById('f-sugestoes').value,
+    satisfacao: satisfacaoValue,
+    analyzed: false,
+    analysis: null
+  };
+
+  allResponses.push(response);
+  localStorage.setItem('incluirh_responses', JSON.stringify(allResponses));
+  showPage('page-success');
+}
+
+// ============ DASHBOARD ============
+function showDashTab(tab) {
+  ['overview','responses','analytics','actions'].forEach(t => {
+    document.getElementById('tab-content-' + t).classList.add('hidden');
+    const el = document.getElementById('tab-' + t);
+    el.className = 'sidebar-item w-full text-left px-4 py-3 rounded text-sm font-medium flex items-center gap-3';
+  });
+  document.getElementById('tab-content-' + tab).classList.remove('hidden');
+  document.getElementById('tab-' + tab).className = 'sidebar-item active w-full text-left px-4 py-3 rounded text-sm font-medium flex items-center gap-3';
+
+  const titles = { overview: ['Visao Geral','Resumo dos formularios recebidos'], responses: ['Respostas','Todos os formularios enviados pelos funcionarios'], analytics: ['Analises','Graficos e insights dos dados coletados'], actions: ['Plano de Ação','Recomendacoes baseadas em IA'] };
+  document.getElementById('dash-title').textContent = titles[tab][0]; document.getElementById('dash-breadcrumb').textContent = titles[tab][0];
+  document.getElementById('dash-subtitle').textContent = titles[tab][1];
+
+  if (tab === 'analytics') renderAnalyticsCharts();
+  if (tab === 'responses') renderResponsesTable();
+}
+
+function refreshDashboard() {
+  allResponses = JSON.parse(localStorage.getItem('incluirh_responses') || '[]');
+  const pcd = allResponses.filter(r => r.deficiencias.length > 0 && !r.deficiencias.includes('nenhuma')).length;
+  const critical = allResponses.filter(r => parseInt(r.grau) >= 3).length;
+  const analyzed = allResponses.filter(r => r.analyzed).length;
+  document.getElementById('stat-total').textContent = allResponses.length;
+  document.getElementById('stat-pcd').textContent = pcd;
+  document.getElementById('stat-critical').textContent = critical;
+  document.getElementById('stat-analyzed').textContent = analyzed;
+  document.getElementById('response-count').textContent = allResponses.length + ' respostas';
+  renderOverviewCharts();
+  renderRecentList();
+}
+
+function renderOverviewCharts() {
+  const typeCounts = { fisica:0, visual:0, auditiva:0, intelectual:0, multipla:0, nenhuma:0 };
+  const diffCounts = [0,0,0,0,0];
+  allResponses.forEach(r => {
+    r.deficiencias.forEach(d => { if(typeCounts[d] !== undefined) typeCounts[d]++; });
+    if (r.grau !== '') diffCounts[parseInt(r.grau)]++;
+  });
+
+  if (chartTypes) chartTypes.destroy();
+  const ctx1 = document.getElementById('chart-types').getContext('2d');
+  chartTypes = new Chart(ctx1, {
+    type: 'doughnut',
+    data: {
+      labels: ['Física/Motora','Visual','Auditiva','Intelectual','Múltipla','Nenhuma'],
+      datasets: [{ data: Object.values(typeCounts), backgroundColor: ['#009B3A','#8b5cf6','#06b6d4','#f59e0b','#ef4444','#10b981'], borderWidth: 0 }]
+    },
+    options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }, cutout: '65%' }
+  });
+
+  if (chartDifficulty) chartDifficulty.destroy();
+  const ctx2 = document.getElementById('chart-difficulty').getContext('2d');
+  chartDifficulty = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: ['Nenhum','Leve','Moderado','Significativo','Severo'],
+      datasets: [{ label: 'Funcionários', data: diffCounts, backgroundColor: ['#10b981','#009B3A','#f59e0b','#f97316','#ef4444'], borderRadius: 8, borderWidth: 0 }]
+    },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+  });
+}
+
+function renderAnalyticsCharts() {
+  const areaCounts = { deslocamento:0, comunicacao:0, tecnologia:0, reunioes:0, ergonomia:0, documentos:0, concentracao:0 };
+  const satCounts = [0,0,0,0,0];
+  allResponses.forEach(r => {
+    r.areas.forEach(a => { if(areaCounts[a] !== undefined) areaCounts[a]++; });
+    if (r.satisfacao > 0) satCounts[r.satisfacao - 1]++;
+  });
+
+  if (chartAreas) chartAreas.destroy();
+  const ctx3 = document.getElementById('chart-areas').getContext('2d');
+  chartAreas = new Chart(ctx3, {
+    type: 'bar',
+    data: {
+      labels: ['Deslocamento','Comunicação','Tecnologia','Reuniões','Ergonomia','Documentos','Concentração'],
+      datasets: [{ data: Object.values(areaCounts), backgroundColor: '#009B3A', borderRadius: 6, borderWidth: 0 }]
+    },
+    options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: '#f1f5f9' } }, y: { grid: { display: false } } } }
+  });
+
+  if (chartSatisfaction) chartSatisfaction.destroy();
+  const ctx4 = document.getElementById('chart-satisfaction').getContext('2d');
+  chartSatisfaction = new Chart(ctx4, {
+    type: 'radar',
+    data: {
+      labels: ['Muito Ruim','Ruim','Regular','Bom','Excelente'],
+      datasets: [{ label: 'Funcionários', data: satCounts, backgroundColor: 'rgba(0,155,58,0.15)', borderColor: '#009B3A', borderWidth: 2, pointBackgroundColor: '#009B3A' }]
+    },
+    options: { plugins: { legend: { display: false } }, scales: { r: { beginAtZero: true, grid: { color: '#e2e8f0' } } } }
+  });
+
+  // Top suggestions
+  const suggDiv = document.getElementById('top-suggestions');
+  const keywords = ['leitura de tela','elevador','libras','ergonômica','fonte maior','intérprete','rampas','headset','software'];
+  const found = keywords.map(k => ({ kw: k, count: allResponses.filter(r => (r.sugestoes+r.desafios+r.outros).toLowerCase().includes(k)).length })).filter(x => x.count > 0).sort((a,b) => b.count - a.count).slice(0,6);
+  if (found.length > 0) {
+    suggDiv.innerHTML = found.map(f => `<div class="bg-green-50 rounded-md p-4 text-center"><div class="text-2xl font-bold text-green-700">${f.count}</div><div class="text-sm text-gray-600 mt-1 capitalize">${f.kw}</div><div class="text-xs text-gray-400">menções</div></div>`).join('');
+  } else {
+    suggDiv.innerHTML = '<p class="text-gray-400 text-sm col-span-3 text-center py-4">Adicione dados de teste para ver sugestões</p>';
+  }
+}
+
+function renderRecentList() {
+  const container = document.getElementById('recent-list');
+  if (allResponses.length === 0) {
+    container.innerHTML = '<p class="text-gray-400 text-sm text-center py-6">Nenhuma resposta ainda. Clique em "Dados de teste" para simular.</p>';
+    return;
+  }
+  const last5 = [...allResponses].reverse().slice(0, 5);
+  container.innerHTML = last5.map(r => {
+    const isPcd = r.deficiencias.length > 0 && !r.deficiencias.includes('nenhuma');
+    const grauColors = ['green','blue','yellow','orange','red'];
+    const grauLabels = ['Sem dificuldade','Leve','Moderado','Significativo','Severo'];
+    const grau = parseInt(r.grau) || 0;
+    return `<div class="flex items-center justify-between p-4 bg-gray-50 rounded-md">
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center font-bold text-green-700">${r.nome.charAt(0)}</div>
+        <div>
+          <div class="font-semibold text-gray-800">${r.nome}</div>
+          <div class="text-xs text-gray-500">${r.cargo || 'Cargo não informado'} • Mat. ${r.matricula}</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        ${isPcd ? '<span class="badge bg-purple-100 text-purple-700">PcD</span>' : ''}
+        <span class="badge bg-${grauColors[grau]}-100 text-${grauColors[grau]}-700">${grauLabels[grau]}</span>
+        <button onclick="openAnalysis('${r.id}')" class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-lg hover:bg-green-800 transition">Analisar →</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderResponsesTable() {
+  const container = document.getElementById('responses-table');
+  const query = (document.getElementById('search-input').value || '').toLowerCase();
+  const filtered = allResponses.filter(r => r.nome.toLowerCase().includes(query) || r.matricula.toLowerCase().includes(query));
+  if (filtered.length === 0) {
+    container.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">Nenhuma resposta encontrada.</p>';
+    return;
+  }
+  container.innerHTML = `
+    <div class="grid grid-cols-6 gap-4 px-6 py-3 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+      <div class="col-span-2">Funcionário</div><div>Deficiência</div><div>Grau</div><div>Status</div><div>Ação</div>
+    </div>` +
+    filtered.map(r => {
+      const isPcd = r.deficiencias.length > 0 && !r.deficiencias.includes('nenhuma');
+      const defLabel = isPcd ? r.deficiencias.filter(d => d !== 'nenhuma').join(', ') : '—';
+      const grauLabels = ['Nenhum','Leve','Moderado','Significativo','Severo'];
+      const grau = parseInt(r.grau) || 0;
+      const date = new Date(r.timestamp).toLocaleDateString('pt-BR');
+      return `<div class="grid grid-cols-6 gap-4 px-6 py-4 hover:bg-gray-50 transition items-center">
+        <div class="col-span-2 flex items-center gap-3">
+          <div class="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center font-bold text-green-700 text-sm">${r.nome.charAt(0)}</div>
+          <div>
+            <div class="font-medium text-gray-800 text-sm">${r.nome}</div>
+            <div class="text-xs text-gray-400">Mat. ${r.matricula} • ${date}</div>
+          </div>
+        </div>
+        <div class="text-sm text-gray-600">${isPcd ? '<span class="badge bg-purple-100 text-purple-700">' + defLabel.substring(0,20) + '</span>' : '<span class="text-gray-400">—</span>'}</div>
+        <div class="text-sm">${grauLabels[grau]}</div>
+        <div>${r.analyzed ? '<span class="badge bg-green-100 text-green-700"> Analisado</span>' : '<span class="badge bg-gray-100 text-gray-500">Pendente</span>'}</div>
+        <div><button onclick="openAnalysis('${r.id}')" class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-lg hover:bg-green-800 transition">Ver análise</button></div>
+      </div>`;
+    }).join('');
+}
+
+function filterResponses() { renderResponsesTable(); }
+
+// ============ AI ANALYSIS ============
+async function openAnalysis(id) {
+  const r = allResponses.find(x => x.id === id);
+  if (!r) return;
+  currentAnalysis = r;
+  document.getElementById('modal-analysis').classList.remove('hidden');
+  document.getElementById('modal-content').innerHTML = `
+    <div class="text-center py-8">
+      <div class="typing-dots text-green-600 text-3xl mb-3"><span></span><span></span><span></span></div>
+      <p class="text-gray-500 font-medium">Analisando com Inteligência Artificial...</p>
+      <p class="text-gray-400 text-sm mt-1">Isso pode levar alguns segundos</p>
+    </div>`;
+
+  if (r.analyzed && r.analysis) {
+    displayAnalysis(r.analysis, r);
+    return;
+  }
+
+  const isPcd = r.deficiencias.length > 0 && !r.deficiencias.includes('nenhuma');
+  const defStr = r.deficiencias.join(', ') || 'nenhuma declarada';
+  const areasStr = r.areas.join(', ') || 'não informado';
+
+  const prompt = `Você é um especialista em inclusão e acessibilidade no trabalho (RH). Analise o perfil do funcionário abaixo e gere um relatório estruturado em JSON com o seguinte formato EXATO (apenas JSON puro, sem markdown):
+
+{"nome":"${r.nome}","cargo":"${r.cargo || 'não informado'}","resumo":"resumo executivo em 2 frases","prioridade":"ALTA|MEDIA|BAIXA","problemas":[{"titulo":"problema","descricao":"descrição detalhada","impacto":"impacto no trabalho","urgencia":"URGENTE|IMPORTANTE|MONITORAR"}],"solucoes":[{"problema_ref":"título do problema relacionado","acao":"ação específica","custo":"BAIXO|MEDIO|ALTO","prazo":"IMEDIATO|CURTO (1-3 meses)|MEDIO (3-6 meses)","responsavel":"RH|TI|Facilities|Gestão","detalhes":"como implementar"}],"legislacao":["normas/leis aplicáveis"],"indicadores":["métricas para acompanhar"]}
+
+Perfil do funcionário:
+- Nome: ${r.nome}
+- Cargo: ${r.cargo || 'não informado'}
+- Tempo de empresa: ${r.tempo || 'não informado'}
+- Modalidade: ${r.modalidade || 'não informado'}
+- Deficiências declaradas: ${defStr}
+- Grau de dificuldade (0=nenhum, 4=severo): ${r.grau}
+- Áreas afetadas: ${areasStr}
+- Desafios descritos: ${r.desafios || 'não informado'}
+- Recursos atuais: ${r.recursos || 'não informado'}
+- Sugestões do funcionário: ${r.sugestoes || 'não informado'}
+- Satisfação atual (1-5): ${r.satisfacao}
+- Outras condições: ${r.outros || 'nenhuma'}
+
+Gere apenas o JSON sem nenhum texto adicional.`;
+
+  try {
+    let analysisData;
+    if (apiKey) {
+      const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error.message);
+      let text = data.candidates[0].content.parts[0].text;
+      text = text.replace(/```json/g,'').replace(/```/g,'').trim();
+      analysisData = JSON.parse(text);
+    } else {
+      analysisData = generateMockAnalysis(r);
+    }
+
+    r.analyzed = true;
+    r.analysis = analysisData;
+    localStorage.setItem('incluirh_responses', JSON.stringify(allResponses));
+    displayAnalysis(analysisData, r);
+    refreshDashboard();
+  } catch(e) {
+    document.getElementById('modal-content').innerHTML = `
+      <div class="bg-red-50 rounded-md p-6 text-center">
+        <div class="text-3xl mb-3"></div>
+        <p class="font-semibold text-red-700">Erro ao consultar IA</p>
+        <p class="text-sm text-red-500 mt-2">${e.message}</p>
+        <p class="text-xs text-gray-500 mt-3">Verifique sua chave de API ou use dados de demonstração.</p>
+        <button onclick="currentAnalysis.analysis=generateMockAnalysis(currentAnalysis);displayAnalysis(currentAnalysis.analysis,currentAnalysis)" class="mt-4 bg-green-700 text-white px-6 py-2 rounded text-sm hover:bg-green-800 transition">Usar análise de demonstração</button>
+      </div>`;
+  }
+}
+
+function generateMockAnalysis(r) {
+  const isPcd = r.deficiencias.length > 0 && !r.deficiencias.includes('nenhuma');
+  return {
+    nome: r.nome, cargo: r.cargo || 'Não informado',
+    resumo: isPcd ? `Funcionário(a) ${r.nome} apresenta ${r.deficiencias.join(' e ')} com grau de impacto ${['nenhum','leve','moderado','significativo','severo'][parseInt(r.grau)||0]} nas atividades laborais. Recomenda-se ação imediata para garantir pleno exercício das funções.` : `Funcionário(a) ${r.nome} não declarou deficiências, porém mencionou desafios ergonômicos e de acessibilidade que merecem atenção.`,
+    prioridade: parseInt(r.grau) >= 3 ? 'ALTA' : parseInt(r.grau) >= 1 ? 'MEDIA' : 'BAIXA',
+    problemas: [
+      { titulo: 'Adaptações de acessibilidade', descricao: 'O funcionário relata necessidade de adequações no ambiente e ferramentas de trabalho.', impacto: 'Redução de produtividade e bem-estar', urgencia: parseInt(r.grau) >= 3 ? 'URGENTE' : 'IMPORTANTE' },
+      { titulo: 'Suporte técnico insuficiente', descricao: 'Ausência de tecnologias assistivas adequadas ao perfil do colaborador.', impacto: 'Limitação no uso de sistemas e comunicação', urgencia: 'IMPORTANTE' }
+    ],
+    solucoes: [
+      { problema_ref: 'Adaptações de acessibilidade', acao: 'Realizar laudo ergonômico e de acessibilidade individualizado', custo: 'MEDIO', prazo: 'IMEDIATO', responsavel: 'RH', detalhes: 'Contratar especialista em acessibilidade para avaliar o posto de trabalho e recomendar adequações específicas para o perfil.' },
+      { problema_ref: 'Suporte técnico insuficiente', acao: 'Implementar pacote de tecnologia assistiva', custo: 'MEDIO', prazo: 'CURTO (1-3 meses)', responsavel: 'TI', detalhes: 'Instalar softwares de leitura de tela, ampliação ou comunicação alternativa conforme a necessidade específica. Ex: NVDA, ZoomText, Dragon Naturally Speaking.' }
+    ],
+    legislacao: ['Lei Brasileira de Inclusão (LBI) — Lei 13.146/2015', 'Decreto 3.298/1999 (cota PcD)', 'NBR 9050 (Acessibilidade)','NR-17 (Ergonomia)'],
+    indicadores: ['Número de adaptações implementadas', 'Satisfação do colaborador (survey trimestral)', 'Absenteísmo por condição', 'Taxa de retenção PcD']
+  };
+}
+
+function displayAnalysis(data, r) {
+  const prioColors = { ALTA: 'red', MEDIA: 'amber', BAIXA: 'green' };
+  const urgColors = { URGENTE: 'red', IMPORTANTE: 'amber', MONITORAR: 'blue' };
+  const custoColors = { ALTO: 'red', MEDIO: 'amber', BAIXO: 'green' };
+  const pc = prioColors[data.prioridade] || 'gray';
+
+  document.getElementById('modal-content').innerHTML = `
+    <div class="fade-in space-y-6">
+      <!-- Header -->
+      <div class="rounded p-5 flex items-center justify-between border border-green-200" style="background:#e6f5ec;">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 bg-green-700 text-white rounded-md flex items-center justify-center text-2xl font-bold">${data.nome.charAt(0)}</div>
+          <div>
+            <div class="font-bold text-gray-800 text-lg">${data.nome}</div>
+            <div class="text-gray-500 text-sm">${data.cargo}</div>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="text-xs text-gray-500 mb-1">Prioridade</div>
+          <span class="badge bg-${pc}-100 text-${pc}-700 text-sm">${data.prioridade}</span>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="bg-green-50 rounded-md p-4 border-l-4 border-green-600">
+        <div class="text-xs font-semibold text-green-700 mb-1 uppercase">Resumo Executivo</div>
+        <p class="text-gray-700 text-sm">${data.resumo}</p>
+      </div>
+
+      <!-- Problems -->
+      <div>
+        <h4 class="font-semibold text-gray-700 mb-3 flex items-center gap-2"> Problemas Identificados (${data.problemas.length})</h4>
+        <div class="space-y-3">
+          ${data.problemas.map(p => `
+            <div class="border border-gray-200 rounded-md p-4">
+              <div class="flex items-start justify-between mb-2">
+                <div class="font-semibold text-gray-800 text-sm">${p.titulo}</div>
+                <span class="badge bg-${urgColors[p.urgencia]||'gray'}-100 text-${urgColors[p.urgencia]||'gray'}-700 ml-2 whitespace-nowrap">${p.urgencia}</span>
+              </div>
+              <p class="text-gray-600 text-sm">${p.descricao}</p>
+              <div class="mt-2 text-xs text-gray-500 bg-gray-50 rounded px-3 py-2">Impacto: ${p.impacto}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Solutions -->
+      <div>
+        <h4 class="font-semibold text-gray-700 mb-3 flex items-center gap-2"> Soluções Recomendadas (${data.solucoes.length})</h4>
+        <div class="space-y-3">
+          ${data.solucoes.map(s => `
+            <div class="border border-green-200 bg-green-50 rounded-md p-4">
+              <div class="flex flex-wrap items-center gap-2 mb-2">
+                <div class="font-semibold text-gray-800 text-sm flex-1">${s.acao}</div>
+                <span class="badge bg-${custoColors[s.custo]||'gray'}-100 text-${custoColors[s.custo]||'gray'}-700">R$ ${s.custo}</span>
+                <span class="badge bg-green-100 text-green-800">Prazo: ${s.prazo}</span>
+                <span class="badge bg-gray-100 text-gray-700"> ${s.responsavel}</span>
+              </div>
+              <p class="text-gray-600 text-sm">${s.detalhes}</p>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Legislation -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-amber-50 rounded-md p-4">
+          <h4 class="font-semibold text-amber-800 text-sm mb-2">Legislacao Aplicavel</h4>
+          <ul class="space-y-1">${data.legislacao.map(l => `<li class="text-xs text-amber-700">• ${l}</li>`).join('')}</ul>
+        </div>
+        <div class="bg-purple-50 rounded-md p-4">
+          <h4 class="font-semibold text-purple-800 text-sm mb-2">Indicadores de Acompanhamento</h4>
+          <ul class="space-y-1">${data.indicadores.map(i => `<li class="text-xs text-purple-700">• ${i}</li>`).join('')}</ul>
+        </div>
+      </div>
+    </div>`;
+}
+
+function closeModal() {
+  document.getElementById('modal-analysis').classList.add('hidden');
+  currentAnalysis = null;
+}
+
+// ============ ACTION PLAN ============
+async function generateActionPlan() {
+  if (allResponses.length === 0) { alert('Nenhuma resposta disponível para gerar o plano.'); return; }
+  const container = document.getElementById('action-plan-content');
+  container.innerHTML = `<div class="text-center py-16 bg-white rounded-md shadow-sm"><div class="typing-dots text-green-600 text-3xl mb-3"><span></span><span></span><span></span></div><p class="text-gray-500 font-medium">Gerando plano de ação corporativo com IA...</p></div>`;
+
+  const pcd = allResponses.filter(r => r.deficiencias.length > 0 && !r.deficiencias.includes('nenhuma')).length;
+  const critical = allResponses.filter(r => parseInt(r.grau) >= 3).length;
+  const allDef = allResponses.flatMap(r => r.deficiencias).reduce((acc, d) => { acc[d] = (acc[d]||0)+1; return acc; }, {});
+  const topDef = Object.entries(allDef).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${k}(${v})`).join(', ');
+  const allSugg = allResponses.map(r => r.sugestoes).filter(Boolean).join('. ');
+
+  const suggestions = [
+    { icon: '', title: 'Infraestrutura e Acessibilidade Física', items: ['Instalar rampas e elevadores acessíveis', 'Revisar largura dos corredores (mín. 1,20m — NBR 9050)', 'Sinalização tátil nos pisos', 'Banheiros adaptados em todos os andares'] },
+    { icon: '', title: 'Tecnologia Assistiva', items: ['Licenças de leitores de tela (NVDA, JAWS)', 'Ampliadores de tela e teclados adaptados', 'Softwares de ditado por voz', 'Plataformas com acessibilidade WCAG 2.1'] },
+    { icon: '', title: 'Capacitação e Cultura', items: ['Treinamento de liderança em inclusão', 'Curso de LIBRAS para toda a equipe', 'Políticas de diversidade e inclusão', 'Comitê de inclusão com representantes PcD'] },
+    { icon: '', title: 'Processos de RH', items: ['Mapeamento anual de necessidades', 'Onboarding acessível para novos PcD', 'Plano de desenvolvimento individual adaptado', 'Canal de feedback exclusivo para PcD'] }
+  ];
+
+  await new Promise(r => setTimeout(r, 1200)); // simulate loading
+
+  container.innerHTML = `
+    <div class="fade-in space-y-6">
+      <div class="bg-white rounded-md p-6 shadow-sm">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-12 h-12 bg-green-700 rounded-md text-white flex items-center justify-center text-2xl"></div>
+          <div>
+            <h3 class="font-bold text-gray-800 text-lg">Plano de Ação Corporativo — Inclusão e Acessibilidade</h3>
+            <p class="text-gray-500 text-sm">Gerado com base em ${allResponses.length} formulários • ${pcd} PcD identificados • ${critical} casos prioritários</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-4 mb-6">
+          <div class="bg-red-50 rounded-md p-4 text-center"><div class="text-2xl font-bold text-red-600">${critical}</div><div class="text-xs text-red-500">Casos urgentes</div></div>
+          <div class="bg-purple-50 rounded-md p-4 text-center"><div class="text-2xl font-bold text-purple-600">${pcd}</div><div class="text-xs text-purple-500">PcD declarados</div></div>
+          <div class="bg-green-50 rounded-md p-4 text-center"><div class="text-2xl font-bold text-green-700">${allResponses.length}</div><div class="text-xs text-green-600">Respondentes</div></div>
+        </div>
+        <div class="bg-amber-50 rounded-md p-4 mb-6 border border-amber-200">
+          <div class="font-semibold text-amber-800 mb-1">Analise Executiva</div>
+          <p class="text-sm text-amber-700">Com base nos dados coletados, a empresa possui oportunidade significativa de melhoria em acessibilidade. As deficiências mais frequentes são: <strong>${topDef || 'dados insuficientes'}</strong>. Recomenda-se priorizar ações de infraestrutura e tecnologia assistiva nos próximos 90 dias.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          ${suggestions.map((s, i) => `
+            <div class="border border-gray-200 rounded-md p-5">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="text-2xl">${s.icon}</span>
+                <h4 class="font-semibold text-gray-800">${s.title}</h4>
+              </div>
+              <ul class="space-y-2">
+                ${s.items.map(item => `<li class="flex items-start gap-2 text-sm text-gray-600"><span class="text-green-500 mt-0.5"></span>${item}</li>`).join('')}
+              </ul>
+            </div>`).join('')}
+        </div>
+      </div>
+      <button onclick="exportActionPlanPDF()" class="text-white w-full py-3.5 rounded font-bold hover:opacity-90 transition text-sm" style="background:#009B3A;">
+        Exportar Plano de Ação em PDF
+      </button>
+    </div>`;
+}
+
+// ============ PDF GENERATION ============
+function generatePDF() {
+  if (!currentAnalysis || !currentAnalysis.analysis) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const data = currentAnalysis.analysis;
+  let y = 20;
+
+  // Header
+  doc.setFillColor(0, 123, 58);
+  doc.rect(0, 0, 210, 40, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(20); doc.setFont('helvetica', 'bold');
+  doc.text('Petrobras — Petro Inclusive: Relatorio de Analise Individual', 20, 20);
+  doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+  doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} | Confidencial — Uso Restrito ao RH`, 20, 32);
+
+  y = 55;
+  doc.setTextColor(30, 30, 30);
+
+  // Employee info
+  doc.setFillColor(239, 246, 255);
+  doc.rect(15, y - 5, 180, 28, 'F');
+  doc.setFontSize(14); doc.setFont('helvetica', 'bold');
+  doc.setTextColor(0, 123, 58);
+  doc.text(data.nome, 20, y + 5);
+  doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+  doc.setTextColor(80, 80, 80);
+  doc.text(`Cargo: ${data.cargo}  |  Prioridade: ${data.prioridade}`, 20, y + 16);
+  y += 38;
+
+  // Summary
+  doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 30, 30);
+  doc.text('Resumo Executivo', 20, y);
+  y += 7;
+  doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60);
+  const summaryLines = doc.splitTextToSize(data.resumo, 170);
+  doc.text(summaryLines, 20, y);
+  y += summaryLines.length * 6 + 10;
+
+  // Problems
+  doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(220, 38, 38);
+  doc.text('Problemas Identificados', 20, y); y += 8;
+  data.problemas.forEach((p, i) => {
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 30, 30);
+    doc.text(`${i+1}. ${p.titulo} [${p.urgencia}]`, 20, y); y += 6;
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 80, 80);
+    const lines = doc.splitTextToSize(p.descricao + ' | Impacto: ' + p.impacto, 165);
+    doc.text(lines, 25, y); y += lines.length * 5 + 5;
+    if (y > 260) { doc.addPage(); y = 20; }
+  });
+  y += 5;
+
+  // Solutions
+  doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(5, 150, 105);
+  doc.text('Soluções Recomendadas', 20, y); y += 8;
+  data.solucoes.forEach((s, i) => {
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 30, 30);
+    doc.text(`${i+1}. ${s.acao}`, 20, y); y += 6;
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 80, 80);
+    doc.text(`Custo: ${s.custo} | Prazo: ${s.prazo} | Responsável: ${s.responsavel}`, 25, y); y += 5;
+    const lines = doc.splitTextToSize(s.detalhes, 165);
+    doc.text(lines, 25, y); y += lines.length * 5 + 5;
+    if (y > 260) { doc.addPage(); y = 20; }
+  });
+  y += 5;
+
+  // Legislation
+  if (y > 240) { doc.addPage(); y = 20; }
+  doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(180, 120, 0);
+  doc.text('Legislação Aplicável', 20, y); y += 7;
+  doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60);
+  data.legislacao.forEach(l => { doc.text('• ' + l, 25, y); y += 5; });
+  y += 5;
+
+  doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(109, 40, 217);
+  doc.text('Indicadores de Acompanhamento', 20, y); y += 7;
+  doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60);
+  data.indicadores.forEach(i => { doc.text('• ' + i, 25, y); y += 5; });
+
+  // Footer
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFillColor(0, 123, 58);
+    doc.rect(0, 285, 210, 12, 'F');
+    doc.setFontSize(8); doc.setTextColor(255, 255, 255);
+    doc.text('Petrobras | Petro Inclusive — Sistema de Gestao de Inclusao | Documento Confidencial | LGPD', 20, 292);
+    doc.text(`Página ${i} de ${pageCount}`, 185, 292);
+  }
+
+  doc.save(`IncluiRH_${data.nome.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.pdf`);
+}
+
+function exportActionPlanPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  let y = 20;
+
+  doc.setFillColor(0, 123, 58);
+  doc.rect(0, 0, 210, 45, 'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(22); doc.setFont('helvetica','bold');
+  doc.text('Petrobras | Petro Inclusive — Plano de Ação Corporativo', 20, 22);
+  doc.setFontSize(11); doc.setFont('helvetica','normal');
+  doc.text(`Inclusão e Acessibilidade • Gerado em ${new Date().toLocaleDateString('pt-BR')}`, 20, 35);
+  y = 60;
+
+  doc.setTextColor(30,30,30); doc.setFontSize(13); doc.setFont('helvetica','bold');
+  doc.text('Resumo Executivo', 20, y); y += 8;
+  doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(60,60,60);
+  const summary = `Este plano foi gerado com base em ${allResponses.length} formulários coletados, identificando ${allResponses.filter(r=>r.deficiencias.length>0&&!r.deficiencias.includes('nenhuma')).length} colaboradores PcD e ${allResponses.filter(r=>parseInt(r.grau)>=3).length} casos prioritários. As ações foram priorizadas por impacto e urgência.`;
+  const sumLines = doc.splitTextToSize(summary, 170);
+  doc.text(sumLines, 20, y); y += sumLines.length * 6 + 15;
+
+  const sections = [
+    { title: 'Infraestrutura e Acessibilidade Física', color: [239, 68, 68], items: ['Instalar rampas e elevadores acessíveis (NBR 9050)', 'Revisar largura mínima dos corredores: 1,20m', 'Sinalização tátil nos pisos e escadas', 'Adaptar banheiros em todos os andares', 'Vagas exclusivas no estacionamento'] },
+    { title: 'Tecnologia Assistiva', color: [59, 130, 246], items: ['Licenças de leitores de tela (NVDA, JAWS, VoiceOver)', 'Ampliadores de tela e fontes acessíveis', 'Softwares de ditado por voz', 'Sistemas com padrão WCAG 2.1', 'Teclados e mouses adaptados'] },
+    { title: 'Capacitação e Cultura Inclusiva', color: [16, 185, 129], items: ['Treinamento obrigatório de liderança em inclusão', 'Curso de LIBRAS para colaboradores', 'Workshop de sensibilização para toda a equipe', 'Comitê de inclusão com representantes PcD', 'Política de diversidade e inclusão formal'] },
+    { title: 'Processos de RH', color: [245, 158, 11], items: ['Mapeamento anual de necessidades individuais', 'Onboarding acessível para novos PcD', 'Plano de desenvolvimento adaptado por perfil', 'Canal de feedback exclusivo e anônimo', 'Relatórios trimestrais de inclusão para liderança'] }
+  ];
+
+  sections.forEach(sec => {
+    if (y > 240) { doc.addPage(); y = 20; }
+    doc.setFillColor(...sec.color);
+    doc.rect(15, y-4, 4, 18, 'F');
+    doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
+    doc.text(sec.title, 25, y + 4); y += 14;
+    doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(60,60,60);
+    sec.items.forEach(item => { doc.text('  ' + item, 25, y); y += 6; });
+    y += 8;
+  });
+
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFillColor(0, 123, 58);
+    doc.rect(0, 285, 210, 12, 'F');
+    doc.setFontSize(8); doc.setTextColor(255,255,255);
+    doc.text('Petrobras | Petro Inclusive — Plano de Ação Corporativo | Confidencial | LGPD', 20, 292);
+    doc.text(`Pág. ${i}/${pageCount}`, 185, 292);
+  }
+  doc.save(`IncluiRH_PlanoAcao_${new Date().toISOString().slice(0,10)}.pdf`);
+}
+
+// ============ MOCK DATA ============
+function addMockData() {
+  const mockData = [
+    { nome:'Ana Carolina Silva', matricula:'001234', cargo:'Analista de TI', tempo:'3 a 5 anos', modalidade:'Híbrido', deficiencias:['visual'], grau:'2', areas:['tecnologia','documentos'], desafios:'As interfaces dos sistemas internos têm fontes muito pequenas e sem opção de zoom. O contrato digital não tem versão acessível.', recursos:'Sim, mas precisaria de mais', sugestoes:'Leitor de tela JAWS e fontes maiores nos sistemas internos.', satisfacao:2, nascimento:'1990-05-12' },
+    { nome:'Carlos Eduardo Mendes', matricula:'002345', cargo:'Operador de Logística', tempo:'1 a 3 anos', modalidade:'Presencial', deficiencias:['fisica'], grau:'3', areas:['deslocamento','ergonomia'], desafios:'Uso cadeira de rodas e o acesso ao 2º andar é impossível. Não há elevador e a rampa está com defeito há 3 meses.', recursos:'Não, e precisaria', sugestoes:'Conserto urgente da rampa e instalação de elevador.', satisfacao:1, nascimento:'1985-08-20' },
+    { nome:'Fernanda Lima Costa', matricula:'003456', cargo:'Coordenadora Financeira', tempo:'5 a 10 anos', modalidade:'Remoto', deficiencias:['auditiva'], grau:'2', areas:['comunicacao','reunioes'], desafios:'Reuniões online sem legenda automática são difíceis de acompanhar. Uso aparelho auditivo mas em ambientes barulhentos é insuficiente.', recursos:'Sim, mas precisaria de mais', sugestoes:'Legendas automáticas no Teams e intérprete LIBRAS nas reuniões presenciais mensais.', satisfacao:3, nascimento:'1988-03-15' },
+    { nome:'Roberto Santos Jr.', matricula:'004567', cargo:'Desenvolvedor Backend', tempo:'Menos de 1 ano', modalidade:'Remoto', deficiencias:['intelectual'], grau:'1', areas:['concentracao','tecnologia'], desafios:'Tenho TDAH e ambientes muito estimulantes me tiram o foco. Prefiro trabalhar com ruído branco e sem interrupções frequentes.', recursos:'Não, mas não preciso', sugestoes:'Política de deep work sem reuniões pela manhã e ferramentas de gestão de tarefas visuais.', satisfacao:4, nascimento:'1995-11-08' },
+    { nome:'Patrícia Oliveira Rocha', matricula:'005678', cargo:'Gerente de Projetos', tempo:'Mais de 10 anos', modalidade:'Híbrido', deficiencias:['multipla','fisica','visual'], grau:'4', areas:['deslocamento','tecnologia','reunioes','documentos'], desafios:'Tenho paralisia cerebral leve e baixa visão. Preciso de cadeira adaptada, software de leitura e acesso acessível em todos os andares.', recursos:'Não, e precisaria', sugestoes:'Pacote completo de acessibilidade. Avaliar possibilidade de home office permanente.', satisfacao:1, nascimento:'1980-07-22' }
+  ];
+
+  mockData.forEach(m => {
+    allResponses.push({ id: Date.now().toString() + Math.random(), timestamp: new Date().toISOString(), analyzed: false, analysis: null, outros: '', ...m });
+  });
+  localStorage.setItem('incluirh_responses', JSON.stringify(allResponses));
+  refreshDashboard();
+  renderResponsesTable();
+  alert(' 5 perfis de teste adicionados com sucesso!');
+}
+
+// ============ INIT ============
+setLoginRole('employer');
+</script>
+</body>
+</html>
